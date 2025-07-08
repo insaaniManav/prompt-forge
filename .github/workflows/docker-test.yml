@@ -18,98 +18,98 @@ jobs:
       contents: read
 
     steps:
-    - name: 📥 Checkout repository
-      uses: actions/checkout@v4
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
 
-    - name: 🐳 Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: 🔧 Set lowercase image name
-      id: image-name
-      run: echo "value=$(echo ${{ env.IMAGE_NAME }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+      - name: 🔧 Set lowercase image name
+        id: image-name
+        run: echo "value=$(echo ${{ env.IMAGE_NAME }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
-    - name: 🏷️ Generate simple tags for testing
-      id: meta
-      run: |
-        # Generate a simple tag for testing
-        TAG="test-${GITHUB_SHA::8}"
-        echo "tags=ghcr.io/${{ steps.image-name.outputs.value }}:${TAG}" >> $GITHUB_OUTPUT
-        echo "tag=${TAG}" >> $GITHUB_OUTPUT
+      - name: 🏷️ Generate simple tags for testing
+        id: meta
+        run: |
+          # Generate a simple tag for testing
+          TAG="test-${GITHUB_SHA::8}"
+          echo "tags=ghcr.io/${{ steps.image-name.outputs.value }}:${TAG}" >> $GITHUB_OUTPUT
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
 
-    - name: 🔨 Build Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        platforms: linux/amd64
-        push: false
-        load: true
-        tags: ${{ steps.meta.outputs.tags }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      - name: 🔨 Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-    - name: 🔍 Test Docker image
-      run: |
-        set -euo pipefail
-        
-        # Run the container
-        echo "🚀 Starting container..."
-        docker run --rm -d --name promptforge-test -p 8080:8080 ${{ steps.meta.outputs.tags }}
-        
-        # Wait for service to be ready with active polling
-        echo "⏳ Waiting for service to be ready..."
-        timeout=60
-        interval=2
-        elapsed=0
-        
-        while [ $elapsed -lt $timeout ]; do
-          if curl -s -f http://localhost:8080/api/health > /dev/null 2>&1; then
-            echo "✅ Service is ready after ${elapsed}s"
-            break
+      - name: �� Test Docker image
+        run: |
+          set -euo pipefail
+          
+          # Run the container
+          echo "🚀 Starting container..."
+          docker run --rm -d --name promptforge-test -p 8080:8080 ${{ steps.meta.outputs.tags }}
+          
+          # Wait for service to be ready with active polling
+          echo "⏳ Waiting for service to be ready..."
+          timeout=60
+          interval=2
+          elapsed=0
+          
+          while [ $elapsed -lt $timeout ]; do
+            if curl -s -f http://localhost:8080/api/health > /dev/null 2>&1; then
+              echo "✅ Service is ready after ${elapsed}s"
+              break
+            fi
+            sleep $interval
+            elapsed=$((elapsed + interval))
+            echo "⏳ Still waiting... (${elapsed}s elapsed)"
+          done
+          
+          if [ $elapsed -ge $timeout ]; then
+            echo "❌ Service failed to start within ${timeout}s"
+            docker logs promptforge-test
+            exit 1
           fi
-          sleep $interval
-          elapsed=$((elapsed + interval))
-          echo "⏳ Still waiting... (${elapsed}s elapsed)"
-        done
-        
-        if [ $elapsed -ge $timeout ]; then
-          echo "❌ Service failed to start within ${timeout}s"
-          docker logs promptforge-test
-          exit 1
-        fi
-        
-        # Test health endpoint
-        echo "🔍 Testing health endpoint..."
-        curl -f http://localhost:8080/api/health
-        echo "✅ Health check passed"
-        
-        # Test providers endpoint
-        echo "🔍 Testing providers endpoint..."
-        curl -f http://localhost:8080/api/providers
-        echo "✅ Providers endpoint working"
-        
-        # Test frontend is served
-        echo "🔍 Testing frontend..."
-        curl -f http://localhost:8080/ | grep -q "PromptForge"
-        echo "✅ Frontend is being served"
-        
-        # Cleanup
-        echo "🧹 Cleaning up..."
-        docker stop promptforge-test
-        echo "✅ Docker image test passed"
+          
+          # Test health endpoint
+          echo "🔍 Testing health endpoint..."
+          curl -f http://localhost:8080/api/health
+          echo "✅ Health check passed"
+          
+          # Test providers endpoint
+          echo "🔍 Testing providers endpoint..."
+          curl -f http://localhost:8080/api/providers
+          echo "✅ Providers endpoint working"
+          
+          # Test frontend is served
+          echo "🔍 Testing frontend..."
+          curl -f http://localhost:8080/ | grep -q "PromptForge"
+          echo "✅ Frontend is being served"
+          
+          # Cleanup
+          echo "🧹 Cleaning up..."
+          docker stop promptforge-test
+          echo "✅ Docker image test passed"
 
-    - name: 📊 Test summary
-      run: |
-        echo "## 🧪 Docker Build Test Summary" >> $GITHUB_STEP_SUMMARY
-        echo "| Test | Status |" >> $GITHUB_STEP_SUMMARY
-        echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
-        echo "| Build | ✅ Success |" >> $GITHUB_STEP_SUMMARY
-        echo "| Health Check | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
-        echo "| API Endpoints | ✅ Working |" >> $GITHUB_STEP_SUMMARY
-        echo "| Frontend | ✅ Served |" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Image Tag:** \`${{ steps.meta.outputs.tags }}\`" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### 🔧 Local Testing" >> $GITHUB_STEP_SUMMARY
-        echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-        echo "docker run -p 8080:8080 ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
-        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY 
+      - name: 📊 Test summary
+        run: |
+          echo "## 🧪 Docker Build Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Test | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ✅ Success |" >> $GITHUB_STEP_SUMMARY
+          echo "| Health Check | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| API Endpoints | ✅ Working |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend | ✅ Served |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image Tag:** \`${{ steps.meta.outputs.tags }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔧 Local Testing" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "docker run -p 8080:8080 ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY 

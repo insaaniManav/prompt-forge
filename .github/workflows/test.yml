@@ -118,9 +118,9 @@ jobs:
         go-version: '1.21'
 
     - name: 🛡️ Run Gosec Security Scanner
-      uses: securego/gosec@master
+      uses: securego/gosec@v2.22.5
       with:
-        args: -fmt sarif -out gosec.sarif -no-fail ./api/...
+        args: -fmt sarif -out gosec.sarif ./api/...
 
     - name: 🔎 Check if SARIF file exists
       run: |
