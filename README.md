@@ -22,7 +22,7 @@ Most prompt tools are glorified text editors. PromptForge brings **engineering d
 
 **One-line Docker setup:**
 ```bash
-docker run -d -p 8080:8080 -e ANTHROPIC_API_KEY="your-key" ghcr.io/insaanimanav/prompt-forge:main-f9c6943
+docker run -d -p 8080:8080 -e ANTHROPIC_API_KEY="your-key" ghcr.io/insaanimanav/prompt-forge:main
 ```
 
 **Or clone and run:**

@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  promptforge:
+    image: ghcr.io/insaanimanav/prompt-forge:main-f9c6943
+    container_name: promptforge-test
+    ports:
+      - "8081:8080"
+    environment:
+      # Anthropic API (Default)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      
+      # OpenAI API (Optional)
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      
+      # Azure OpenAI API (Optional)
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}
+      - AZURE_OPENAI_BASE_URL=${AZURE_OPENAI_BASE_URL:-}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-2024-02-15-preview}
+      
+      # Configuration
+      - DEFAULT_AI_PROVIDER=${DEFAULT_AI_PROVIDER:-anthropic}
+      - PORT=8080
+      - DATABASE_PATH=/data/promptforge.db
+    volumes:
+      # Persist database across container restarts
+      - promptforge_test_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  promptforge_test_data:
+    driver: local 

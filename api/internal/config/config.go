@@ -66,10 +66,12 @@ func getDefaultProvider() AIProvider {
 	switch provider {
 	case "openai":
 		return ProviderOpenAI
+	case "azure-openai":
+		return ProviderAzureOpenAI
 	case "anthropic":
 		return ProviderAnthropic
 	default:
-		return ProviderAzureOpenAI
+		return ProviderOpenAI
 	}
 }
 
