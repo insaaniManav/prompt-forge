@@ -49,7 +49,7 @@ jobs:
         images: ${{ env.REGISTRY }}/${{ steps.image-name.outputs.value }}
         tags: |
           type=ref,event=branch,enable={{is_default_branch}}
-          type=ref,event=pr,enable={{is_pr}}
+          type=ref,event=pr
           type=sha,prefix=sha-,enable={{is_pr}}
           type=raw,value=latest,enable={{is_default_branch}}
           type=semver,pattern={{version}}
