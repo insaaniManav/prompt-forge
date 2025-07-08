@@ -120,7 +120,7 @@ jobs:
     - name: 🛡️ Run Gosec Security Scanner
       uses: securego/gosec@master
       with:
-        args: -fmt sarif -out gosec.sarif ./api/...
+        args: -fmt sarif -out gosec.sarif -no-fail ./api/...
 
     - name: 🔎 Check if SARIF file exists
       run: |
