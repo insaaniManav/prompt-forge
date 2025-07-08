@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
@@ -14,6 +16,12 @@ import (
 )
 
 func main() {
+	// Load .env file
+	err := godotenv.Load("../.env") // Load from parent directory
+	if err != nil {
+		log.Printf("Error loading .env file: %v", err)
+	}
+
 	// Initialize configuration
 	config.InitConfig()
 
