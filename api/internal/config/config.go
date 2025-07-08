@@ -71,7 +71,7 @@ func getDefaultProvider() AIProvider {
 	case "anthropic":
 		return ProviderAnthropic
 	default:
-		return ProviderOpenAI
+		return ProviderAnthropic
 	}
 }
 
