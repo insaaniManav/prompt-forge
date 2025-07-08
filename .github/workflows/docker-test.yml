@@ -49,23 +49,51 @@ jobs:
 
     - name: 🔍 Test Docker image
       run: |
+        set -euo pipefail
+        
         # Run the container
+        echo "🚀 Starting container..."
         docker run --rm -d --name promptforge-test -p 8080:8080 ${{ steps.meta.outputs.tags }}
-        sleep 15
+        
+        # Wait for service to be ready with active polling
+        echo "⏳ Waiting for service to be ready..."
+        timeout=60
+        interval=2
+        elapsed=0
+        
+        while [ $elapsed -lt $timeout ]; do
+          if curl -s -f http://localhost:8080/api/health > /dev/null 2>&1; then
+            echo "✅ Service is ready after ${elapsed}s"
+            break
+          fi
+          sleep $interval
+          elapsed=$((elapsed + interval))
+          echo "⏳ Still waiting... (${elapsed}s elapsed)"
+        done
+        
+        if [ $elapsed -ge $timeout ]; then
+          echo "❌ Service failed to start within ${timeout}s"
+          docker logs promptforge-test
+          exit 1
+        fi
         
         # Test health endpoint
-        curl -f http://localhost:8080/api/health || exit 1
+        echo "🔍 Testing health endpoint..."
+        curl -f http://localhost:8080/api/health
         echo "✅ Health check passed"
         
         # Test providers endpoint
-        curl -f http://localhost:8080/api/providers || exit 1
+        echo "🔍 Testing providers endpoint..."
+        curl -f http://localhost:8080/api/providers
         echo "✅ Providers endpoint working"
         
         # Test frontend is served
-        curl -f http://localhost:8080/ | grep -q "PromptForge" || exit 1
+        echo "🔍 Testing frontend..."
+        curl -f http://localhost:8080/ | grep -q "PromptForge"
         echo "✅ Frontend is being served"
         
         # Cleanup
+        echo "🧹 Cleaning up..."
         docker stop promptforge-test
         echo "✅ Docker image test passed"
 
