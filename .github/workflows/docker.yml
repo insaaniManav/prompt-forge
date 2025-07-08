@@ -1,15 +1,17 @@
 name: 🐳 Build & Publish Docker Image (DEPRECATED)
 
+# DISABLED - Use docker-build.yml and docker-test.yml instead
 on:
-  push:
-    branches:
-      - main
-    tags:
-      - 'v*'
-  pull_request:
-    branches:
-      - main
-  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
+  #   tags:
+  #     - 'v*'
+  # pull_request:
+  #   branches:
+  #     - main
+  # workflow_dispatch:
+  workflow_dispatch: # Only manual trigger for emergencies
 
 env:
   REGISTRY: ghcr.io

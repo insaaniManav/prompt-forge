@@ -126,7 +126,7 @@ jobs:
       working-directory: ./api
       run: |
         go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
-        gosec -fmt sarif -out ../gosec.sarif ./...
+        gosec -fmt sarif -out ../../gosec.sarif ./...
 
     - name: 🔎 Check if SARIF file exists
       run: |
@@ -161,6 +161,7 @@ jobs:
 
     - name: 📤 Upload SARIF file
       uses: github/codeql-action/upload-sarif@v3
-      if: always()
+      if: always() && hashFiles('gosec.sarif') != ''
       with:
-        sarif_file: gosec.sarif 
+        sarif_file: gosec.sarif
+        wait-for-processing: false 
