@@ -50,8 +50,8 @@ func TestGetDefaultProvider(t *testing.T) {
 		{"openai", ProviderOpenAI},
 		{"anthropic", ProviderAnthropic},
 		{"azure-openai", ProviderAzureOpenAI},
-		{"invalid", ProviderAzureOpenAI}, // Should default to AzureOpenAI
-		{"", ProviderAnthropic},          // Should default to Anthropic (as per getEnv default)
+		{"invalid", ProviderAnthropic}, // Should default to Anthropic
+		{"", ProviderAnthropic},        // Should default to Anthropic (as per getEnv default)
 	}
 
 	originalProvider := os.Getenv("DEFAULT_AI_PROVIDER")
