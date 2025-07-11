@@ -259,3 +259,19 @@ type AnthropicContent struct {
 type AnthropicResponse struct {
 	Content []AnthropicContent `json:"content"`
 }
+
+// Ollama API structures
+type OllamaRequest struct {
+	Model       string    `json:"model"`
+	Messages    []Message `json:"messages"`
+	Temperature float64   `json:"temperature,omitempty"`
+	Stream      bool      `json:"stream"`
+}
+
+type OllamaResponse struct {
+	Message struct {
+		Role    string `json:"role"`
+		Content string `json:"content"`
+	} `json:"message"`
+	Done bool `json:"done"`
+}
