@@ -1,6 +1,6 @@
 // App state
 const AppState = {
-    API_BASE: '/api',
+    API_BASE: 'http://localhost:8989/api',
     currentTab: 'review',
     currentOperation: 'review',
     executionHistory: [],
@@ -30,6 +30,16 @@ const ProviderModels = {
         { value: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', context: '200K' },
         { value: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku', context: '200K' },
         { value: 'claude-3-opus-20240229', name: 'Claude 3 Opus', context: '200K' }
+    ],
+    'ollama': [
+        { value: 'gemma3:12b', name: 'Gemma 3 12B', context: '128K' },
+        { value: 'llama3.2:3b', name: 'Llama 3.2 3B', context: '128K' },
+        { value: 'llama3.1:8b', name: 'Llama 3.1 8B', context: '128K' },
+        { value: 'mistral:7b', name: 'Mistral 7B', context: '32K' },
+        { value: 'codellama:7b', name: 'Code Llama 7B', context: '16K' },
+        { value: 'phi3:3.8b', name: 'Phi-3 3.8B', context: '128K' },
+        { value: 'gemma2:2b', name: 'Gemma 2 2B', context: '8K' },
+        { value: 'gemma2:9b', name: 'Gemma 2 9B', context: '8K' }
     ]
 };
 
@@ -138,7 +148,8 @@ function getProviderDisplayName(provider) {
     const names = {
         'openai': 'OpenAI',
         'azure-openai': 'Azure OpenAI',
-        'anthropic': 'Anthropic'
+        'anthropic': 'Anthropic',
+        'ollama': 'Ollama'
     };
     return names[provider] || provider;
 }
@@ -792,7 +803,7 @@ window.debugVariableDetection = debugVariableDetection;
 
 async function loadPromptLibrary() {
     try {
-        const response = await fetch('/api/prompts');
+        const response = await fetch(`${AppState.API_BASE}/prompts`);
         const result = await response.json();
         
         if (result.success) {
@@ -822,7 +833,7 @@ async function loadPromptLibrary() {
 
 async function loadPrompt(promptId) {
     try {
-        const response = await fetch(`/api/prompts/${promptId}/use`, {
+        const response = await fetch(`${AppState.API_BASE}/api/prompts/${promptId}/use`, {
             method: 'POST'
         });
         const result = await response.json();
@@ -987,7 +998,7 @@ async function savePrompt() {
     }
     
     try {
-        const response = await fetch('/api/prompts', {
+        const response = await fetch(`${AppState.API_BASE}/api/prompts`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1019,7 +1030,7 @@ async function savePrompt() {
 
 async function editPrompt(promptId) {
     try {
-        const response = await fetch(`/api/prompts/${promptId}`);
+        const response = await fetch(`${AppState.API_BASE}/api/prompts/${promptId}`);
         const result = await response.json();
         
         if (result.success) {
@@ -1051,7 +1062,7 @@ async function updatePrompt(promptId) {
     }
     
     try {
-        const response = await fetch(`/api/prompts/${promptId}`, {
+        const response = await fetch(`${AppState.API_BASE}/api/prompts/${promptId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -1087,7 +1098,7 @@ async function deletePrompt(promptId) {
     }
     
     try {
-        const response = await fetch(`/api/prompts/${promptId}`, {
+        const response = await fetch(`${AppState.API_BASE}/api/prompts/${promptId}`, {
             method: 'DELETE'
         });
         
@@ -1506,8 +1517,8 @@ function populateEvalModelDropdown() {
 }
 
 // Make functions globally accessible
-window.executeTest = executeTest;
-window.reviewPrompt = reviewPrompt;
-window.saveToHistory = saveToHistory;
+//window.executeTest = executeTest;
+//window.reviewPrompt = reviewPrompt;
+//window.saveToHistory = saveToHistory;
 window.toggleExecutionMode = toggleExecutionMode;
 window.getSelectedModels = getSelectedModels; 

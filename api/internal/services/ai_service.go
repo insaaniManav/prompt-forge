@@ -37,6 +37,8 @@ func (s *UnifiedAIService) CallAI(messages []models.Message, temperature float64
 		return s.callAzureOpenAI(messages, temperature, maxTokens, model)
 	case config.ProviderAnthropic:
 		return s.callAnthropic(messages, temperature, maxTokens, model)
+	case config.ProviderOllama:
+		return s.callOllama(messages, temperature, maxTokens, model)
 	default:
 		return "", fmt.Errorf("unsupported AI provider: %s", provider)
 	}
@@ -266,4 +268,61 @@ func (s *UnifiedAIService) callAnthropic(messages []models.Message, temperature 
 	}
 
 	return anthropicResp.Content[0].Text, nil
+}
+
+func (s *UnifiedAIService) callOllama(messages []models.Message, temperature float64, maxTokens int, model string) (string, error) {
+	if config.AppConfig.Ollama.BaseURL == "" {
+		return "", fmt.Errorf("Ollama base URL not configured")
+	}
+
+	// Default to gemma3:12b if no model specified (user's preferred model)
+	if model == "" {
+		model = "gemma3:12b"
+	}
+
+	requestBody := models.OllamaRequest{
+		Model:       model,
+		Messages:    messages,
+		Temperature: temperature,
+		Stream:      false, // We want a complete response, not streaming
+	}
+
+	jsonData, err := json.Marshal(requestBody)
+	if err != nil {
+		return "", err
+	}
+
+	endpoint := fmt.Sprintf("%s/api/chat", strings.TrimSuffix(config.AppConfig.Ollama.BaseURL, "/"))
+	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := s.client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("Ollama API request failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var ollamaResp models.OllamaResponse
+	if err := json.Unmarshal(body, &ollamaResp); err != nil {
+		return "", err
+	}
+
+	if !ollamaResp.Done {
+		return "", fmt.Errorf("incomplete response from Ollama")
+	}
+
+	return ollamaResp.Message.Content, nil
 }

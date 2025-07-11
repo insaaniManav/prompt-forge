@@ -18,6 +18,9 @@ services:
       - AZURE_OPENAI_BASE_URL=${AZURE_OPENAI_BASE_URL:-}
       - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-2024-02-15-preview}
       
+      # Ollama API (Optional - for local AI)
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://localhost:11434}
+      
       # Configuration
       - DEFAULT_AI_PROVIDER=${DEFAULT_AI_PROVIDER:-anthropic}
       - PORT=8080
