@@ -1,13 +1,13 @@
 // App state
 const AppState = {
-    API_BASE: 'http://localhost:8989/api',
+    API_BASE: ENV.API_BASE_URL,
     currentTab: 'review',
     currentOperation: 'review',
     executionHistory: [],
     isResizing: false,
     resizeType: null,
     providers: null,
-    currentProvider: null
+    currentProvider: ENV.DEFAULT_AI_PROVIDER
 };
 
 // Global variables - Use window properties to avoid temporal dead zone issues
@@ -53,7 +53,7 @@ function initializeApp() {
     // Set default provider and populate models immediately
     setTimeout(() => {
         console.log('🚀 Setting up default models immediately');
-        AppState.currentProvider = 'anthropic'; // Based on your config
+        AppState.currentProvider = 'ollama'; // Based on your config
         ensureModelDropdownsPopulated();
     }, 50);
     
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('📄 DOM Content Loaded - ensuring dropdowns are populated');
     setTimeout(() => {
         if (!AppState.currentProvider) {
-            AppState.currentProvider = 'anthropic';
+            AppState.currentProvider = 'ollama';
         }
         ensureModelDropdownsPopulated();
     }, 100);
@@ -109,11 +109,11 @@ async function fetchProviderInfo() {
         
         // Fallback with mock data
         AppState.providers = {
-            default: 'anthropic',
-            available: ['openai', 'azure-openai', 'anthropic'],
-            configured: { 'anthropic': true, 'openai': true, 'azure-openai': false }
+            default: 'ollama',
+            available: ['openai', 'azure-openai', 'anthropic', 'ollama'],
+            configured: { 'anthropic': true, 'openai': true, 'azure-openai': false, 'ollama': true }
         };
-        AppState.currentProvider = 'anthropic';
+        AppState.currentProvider = 'ollama';
         
         updateProviderUI();
         updateModelDropdowns();
@@ -156,8 +156,8 @@ function getProviderDisplayName(provider) {
 
 // Update all model dropdowns based on current provider
 function updateModelDropdowns() {
-    const provider = AppState.currentProvider || 'azure-openai'; // Default fallback
-    const models = ProviderModels[provider] || ProviderModels['azure-openai'];
+    const provider = AppState.currentProvider || 'ollama'; // Default fallback
+    const models = ProviderModels[provider] || ProviderModels['ollama'];
     
     console.log('🔧 Updating model dropdowns for provider:', provider);
     console.log('📋 Available models:', models);
@@ -188,7 +188,7 @@ function updateModelCheckboxes(models) {
         const checkboxItem = document.createElement('label');
         checkboxItem.className = 'checkbox-item';
         checkboxItem.innerHTML = `
-            <input type="checkbox" value="${model.value}" ${model.value === 'gpt-4.1' ? 'checked' : ''}>
+            <input type="checkbox" value="${model.value}" ${model.value === 'gemma3:12b' ? 'checked' : ''}>
             <span>${model.name} (${model.context})</span>
         `;
         checkboxContainer.appendChild(checkboxItem);
@@ -351,8 +351,8 @@ function getCurrentModel() {
     }
     
     // Get default model based on current provider
-    const provider = AppState.currentProvider || 'azure-openai';
-    const models = ProviderModels[provider] || ProviderModels['azure-openai'];
+    const provider = AppState.currentProvider || 'ollama';
+    const models = ProviderModels[provider] || ProviderModels['ollama'];
     return models[0].value; // Return first model as default
 }
 
@@ -1464,7 +1464,7 @@ function ensureModelDropdownsPopulated() {
     
     // Set default provider if not set
     if (!AppState.currentProvider) {
-        AppState.currentProvider = 'anthropic';
+        AppState.currentProvider = 'ollama';
     }
     
     // Manually populate dropdowns
@@ -1480,7 +1480,7 @@ function populateTestModelDropdown() {
         return;
     }
     
-    const models = ProviderModels[AppState.currentProvider] || ProviderModels['anthropic'];
+    const models = ProviderModels[AppState.currentProvider] || ProviderModels['ollama'];
     console.log('🔧 Populating test dropdown with:', models);
     
     dropdown.innerHTML = '';
@@ -1502,7 +1502,7 @@ function populateEvalModelDropdown() {
         return;
     }
     
-    const models = ProviderModels[AppState.currentProvider] || ProviderModels['anthropic'];
+    const models = ProviderModels[AppState.currentProvider] || ProviderModels['ollama'];
     console.log('🔧 Populating eval dropdown with:', models);
     
     dropdown.innerHTML = '';
