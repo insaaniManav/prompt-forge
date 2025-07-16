@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   promptforge:
-    image: ghcr.io/insaanimanav/prompt-forge:main
+    build: .
     container_name: promptforge
     ports:
       - "8080:8080"
