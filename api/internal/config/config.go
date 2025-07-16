@@ -57,7 +57,7 @@ func InitConfig() {
 		},
 		AzureOpenAI: AzureOpenAIConfig{
 			APIKey:     getEnv("AZURE_OPENAI_API_KEY", ""),
-			BaseURL:    getEnv("AZURE_OPENAI_BASE_URL", "https://it-li-m9l4hi9c-eastus2.cognitiveservices.azure.com/"),
+			BaseURL:    getEnv("AZURE_OPENAI_BASE_URL", ""),
 			APIVersion: getEnv("AZURE_OPENAI_API_VERSION", ""),
 		},
 		Anthropic: AnthropicConfig{
