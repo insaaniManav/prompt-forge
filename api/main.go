@@ -13,6 +13,18 @@ import (
 	"promptforge/internal/services"
 )
 
+//fix unhealty container status
+type HealthResponse struct {
+Status string `json:"status"`
+}
+
+func healthHandler(c echo.Context) error {
+if c.Request().Method == "HEAD" {
+return c.NoContent(200)
+}
+return c.JSON(200, HealthResponse{Status: "ok"})
+}
+
 func main() {
 	// Initialize configuration
 	config.InitConfig()
@@ -45,6 +57,7 @@ func main() {
 	// API Routes
 	api := e.Group("/api")
 	api.GET("/health", h.HealthCheck)
+	api.HEAD("/health", healthHandler) //fix unhealty container status
 	api.POST("/critique", h.CritiquePrompt)
 	api.POST("/dual-critique", h.DualCritiquePrompt)
 	api.POST("/execute", h.ExecutePrompt)
