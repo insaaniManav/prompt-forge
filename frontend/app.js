@@ -1,13 +1,13 @@
 // App state
 const AppState = {
-    API_BASE: '/api',
+    API_BASE: ENV.API_BASE_URL,
     currentTab: 'review',
     currentOperation: 'review',
     executionHistory: [],
     isResizing: false,
     resizeType: null,
     providers: null,
-    currentProvider: null
+    currentProvider: ENV.DEFAULT_AI_PROVIDER
 };
 
 // Global variables - Use window properties to avoid temporal dead zone issues
@@ -30,6 +30,16 @@ const ProviderModels = {
         { value: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', context: '200K' },
         { value: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku', context: '200K' },
         { value: 'claude-3-opus-20240229', name: 'Claude 3 Opus', context: '200K' }
+    ],
+    'ollama': [
+        { value: 'gemma3:12b', name: 'Gemma 3 12B', context: '128K' },
+        { value: 'llama3.2:3b', name: 'Llama 3.2 3B', context: '128K' },
+        { value: 'llama3.1:8b', name: 'Llama 3.1 8B', context: '128K' },
+        { value: 'mistral:7b', name: 'Mistral 7B', context: '32K' },
+        { value: 'codellama:7b', name: 'Code Llama 7B', context: '16K' },
+        { value: 'phi3:3.8b', name: 'Phi-3 3.8B', context: '128K' },
+        { value: 'gemma2:2b', name: 'Gemma 2 2B', context: '8K' },
+        { value: 'gemma2:9b', name: 'Gemma 2 9B', context: '8K' }
     ]
 };
 
@@ -43,7 +53,7 @@ function initializeApp() {
     // Set default provider and populate models immediately
     setTimeout(() => {
         console.log('🚀 Setting up default models immediately');
-        AppState.currentProvider = 'anthropic'; // Based on your config
+        AppState.currentProvider = 'ollama'; // Based on your config
         ensureModelDropdownsPopulated();
     }, 50);
     
@@ -70,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('📄 DOM Content Loaded - ensuring dropdowns are populated');
     setTimeout(() => {
         if (!AppState.currentProvider) {
-            AppState.currentProvider = 'anthropic';
+            AppState.currentProvider = 'ollama';
         }
         ensureModelDropdownsPopulated();
     }, 100);
@@ -99,11 +109,11 @@ async function fetchProviderInfo() {
         
         // Fallback with mock data
         AppState.providers = {
-            default: 'anthropic',
-            available: ['openai', 'azure-openai', 'anthropic'],
-            configured: { 'anthropic': true, 'openai': true, 'azure-openai': false }
+            default: 'ollama',
+            available: ['openai', 'azure-openai', 'anthropic', 'ollama'],
+            configured: { 'anthropic': true, 'openai': true, 'azure-openai': false, 'ollama': true }
         };
-        AppState.currentProvider = 'anthropic';
+        AppState.currentProvider = 'ollama';
         
         updateProviderUI();
         updateModelDropdowns();
@@ -138,15 +148,16 @@ function getProviderDisplayName(provider) {
     const names = {
         'openai': 'OpenAI',
         'azure-openai': 'Azure OpenAI',
-        'anthropic': 'Anthropic'
+        'anthropic': 'Anthropic',
+        'ollama': 'Ollama'
     };
     return names[provider] || provider;
 }
 
 // Update all model dropdowns based on current provider
 function updateModelDropdowns() {
-    const provider = AppState.currentProvider || 'azure-openai'; // Default fallback
-    const models = ProviderModels[provider] || ProviderModels['azure-openai'];
+    const provider = AppState.currentProvider || 'ollama'; // Default fallback
+    const models = ProviderModels[provider] || ProviderModels['ollama'];
     
     console.log('🔧 Updating model dropdowns for provider:', provider);
     console.log('📋 Available models:', models);
@@ -177,7 +188,7 @@ function updateModelCheckboxes(models) {
         const checkboxItem = document.createElement('label');
         checkboxItem.className = 'checkbox-item';
         checkboxItem.innerHTML = `
-            <input type="checkbox" value="${model.value}" ${model.value === 'gpt-4.1' ? 'checked' : ''}>
+            <input type="checkbox" value="${model.value}" ${model.value === 'gemma3:12b' ? 'checked' : ''}>
             <span>${model.name} (${model.context})</span>
         `;
         checkboxContainer.appendChild(checkboxItem);
@@ -340,8 +351,8 @@ function getCurrentModel() {
     }
     
     // Get default model based on current provider
-    const provider = AppState.currentProvider || 'azure-openai';
-    const models = ProviderModels[provider] || ProviderModels['azure-openai'];
+    const provider = AppState.currentProvider || 'ollama';
+    const models = ProviderModels[provider] || ProviderModels['ollama'];
     return models[0].value; // Return first model as default
 }
 
@@ -792,7 +803,7 @@ window.debugVariableDetection = debugVariableDetection;
 
 async function loadPromptLibrary() {
     try {
-        const response = await fetch('/api/prompts');
+        const response = await fetch(`${AppState.API_BASE}/prompts`);
         const result = await response.json();
         
         if (result.success) {
@@ -822,7 +833,7 @@ async function loadPromptLibrary() {
 
 async function loadPrompt(promptId) {
     try {
-        const response = await fetch(`/api/prompts/${promptId}/use`, {
+        const response = await fetch(`${AppState.API_BASE}/api/prompts/${promptId}/use`, {
             method: 'POST'
         });
         const result = await response.json();
@@ -987,7 +998,7 @@ async function savePrompt() {
     }
     
     try {
-        const response = await fetch('/api/prompts', {
+        const response = await fetch(`${AppState.API_BASE}/api/prompts`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1019,7 +1030,7 @@ async function savePrompt() {
 
 async function editPrompt(promptId) {
     try {
-        const response = await fetch(`/api/prompts/${promptId}`);
+        const response = await fetch(`${AppState.API_BASE}/api/prompts/${promptId}`);
         const result = await response.json();
         
         if (result.success) {
@@ -1051,7 +1062,7 @@ async function updatePrompt(promptId) {
     }
     
     try {
-        const response = await fetch(`/api/prompts/${promptId}`, {
+        const response = await fetch(`${AppState.API_BASE}/api/prompts/${promptId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -1087,7 +1098,7 @@ async function deletePrompt(promptId) {
     }
     
     try {
-        const response = await fetch(`/api/prompts/${promptId}`, {
+        const response = await fetch(`${AppState.API_BASE}/api/prompts/${promptId}`, {
             method: 'DELETE'
         });
         
@@ -1453,7 +1464,7 @@ function ensureModelDropdownsPopulated() {
     
     // Set default provider if not set
     if (!AppState.currentProvider) {
-        AppState.currentProvider = 'anthropic';
+        AppState.currentProvider = 'ollama';
     }
     
     // Manually populate dropdowns
@@ -1469,7 +1480,7 @@ function populateTestModelDropdown() {
         return;
     }
     
-    const models = ProviderModels[AppState.currentProvider] || ProviderModels['anthropic'];
+    const models = ProviderModels[AppState.currentProvider] || ProviderModels['ollama'];
     console.log('🔧 Populating test dropdown with:', models);
     
     dropdown.innerHTML = '';
@@ -1491,7 +1502,7 @@ function populateEvalModelDropdown() {
         return;
     }
     
-    const models = ProviderModels[AppState.currentProvider] || ProviderModels['anthropic'];
+    const models = ProviderModels[AppState.currentProvider] || ProviderModels['ollama'];
     console.log('🔧 Populating eval dropdown with:', models);
     
     dropdown.innerHTML = '';
@@ -1506,8 +1517,8 @@ function populateEvalModelDropdown() {
 }
 
 // Make functions globally accessible
-window.executeTest = executeTest;
-window.reviewPrompt = reviewPrompt;
-window.saveToHistory = saveToHistory;
+//window.executeTest = executeTest;
+//window.reviewPrompt = reviewPrompt;
+//window.saveToHistory = saveToHistory;
 window.toggleExecutionMode = toggleExecutionMode;
 window.getSelectedModels = getSelectedModels; 

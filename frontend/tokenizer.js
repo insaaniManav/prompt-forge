@@ -88,6 +88,7 @@ function getModelContextInfo() {
         'gpt-4': { name: 'GPT-4', limit: 8192, formattedLimit: '8K' },
         'gpt-4-turbo': { name: 'GPT-4 Turbo', limit: 128000, formattedLimit: '128K' },
         'gpt-3.5-turbo': { name: 'GPT-3.5 Turbo', limit: 16384, formattedLimit: '16K' },
+        'o4-mini': { name: 'O4 Mini', limit: 200000, formattedLimit: '200K' },
         
         // Azure OpenAI models
         'gpt-4.1': { name: 'GPT-4.1', limit: 200000, formattedLimit: '200K' },
@@ -96,12 +97,22 @@ function getModelContextInfo() {
         // Anthropic Claude models
         'claude-3-5-sonnet-20241022': { name: 'Claude 3.5 Sonnet', limit: 200000, formattedLimit: '200K' },
         'claude-3-haiku-20240307': { name: 'Claude 3 Haiku', limit: 200000, formattedLimit: '200K' },
-        'claude-3-opus-20240229': { name: 'Claude 3 Opus', limit: 200000, formattedLimit: '200K' }
+        'claude-3-opus-20240229': { name: 'Claude 3 Opus', limit: 200000, formattedLimit: '200K' },
+        
+        // Ollama models
+        'gemma3:12b': { name: 'Gemma 3 12B', limit: 8192, formattedLimit: '8K' },
+        'llama3.2:3b': { name: 'Llama 3.2 3B', limit: 128000, formattedLimit: '128K' },
+        'llama3.1:8b': { name: 'Llama 3.1 8B', limit: 8192, formattedLimit: '8K' },
+        'mistral:7b': { name: 'Mistral 7B', limit: 32768, formattedLimit: '32K' },
+        'codellama:7b': { name: 'Code Llama 7B', limit: 8192, formattedLimit: '8K' },
+        'phi3:3.8b': { name: 'Phi-3 3.8B', limit: 4096, formattedLimit: '4K' },
+        'gemma2:2b': { name: 'Gemma 2 2B', limit: 8192, formattedLimit: '8K' },
+        'gemma2:9b': { name: 'Gemma 2 9B', limit: 8192, formattedLimit: '8K' }
     };
     
-    // Get current model from selection or default to GPT-4.1
-    const currentModel = (typeof getCurrentModel === 'function') ? getCurrentModel() : 'gpt-4.1';
-    return allModels[currentModel] || allModels['gpt-4.1'];
+    // Get current model from selection or default to Gemma 3 12B (Ollama default)
+    const currentModel = (typeof getCurrentModel === 'function') ? getCurrentModel() : 'gemma3:12b';
+    return allModels[currentModel] || allModels['gemma3:12b'];
 }
 
 // Token warning system

@@ -54,7 +54,7 @@ Creates comprehensive test suites including:
 ### ⚡ Professional Testing
 - Execute with full parameter control
 - Dynamic variable detection and substitution
-- Multi-model comparison side by side (Claude, GPT-4, Azure OpenAI)
+- Multi-model comparison side by side (Claude, GPT-4, Azure OpenAI, Ollama)
 
 ### 📚 Prompt Management
 - Organized library with search and tags
@@ -64,9 +64,10 @@ Creates comprehensive test suites including:
 ## Supported Models
 
 - **Claude 3.5 Sonnet** (200K context) - Excellent reasoning
-- **GPT-4.1** (200K context) - Detailed analysis
+- **GPT-4.1** (200K context) - Detailed analysis  
 - **O3** (1M context) - Fast execution
 - **Azure OpenAI** - Enterprise-ready
+- **Ollama Models** - Local AI with Llama, Mistral, Code Llama, and more
 
 ## Configuration
 
@@ -81,6 +82,10 @@ Creates comprehensive test suites including:
 # Azure OpenAI
 -e AZURE_OPENAI_API_KEY="your-key"
 -e AZURE_OPENAI_BASE_URL="https://your-resource.openai.azure.com"
+
+# Ollama (Local AI)
+-e OLLAMA_BASE_URL="http://localhost:11434"
+-e DEFAULT_AI_PROVIDER="ollama"
 ```
 
 ### Local Development
